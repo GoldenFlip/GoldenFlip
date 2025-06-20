@@ -50,9 +50,9 @@ npm start
 
 ## 📊 Game Stats
 
-- Total Flips: `1000`
-- Total Wins: `480`
-- Total Winnings: `960 SOL`
+- Total Flips: `3`
+- Total Wins: `0.80`
+- Total Winnings: `1.6 SOL`
 
 Stay updated with your performance and game history.
 
@@ -61,8 +61,7 @@ Stay updated with your performance and game history.
 ## 📬 Contact
 
 For inquiries or feedback, feel free to reach out:
-- Email: support@goldenflip.com
-- Discord: [GoldenFlip Community](https://discord.gg/goldenflip)
+- Email: goldenflip@goldenflip.fun
 
 ---
 
